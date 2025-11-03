@@ -604,14 +604,14 @@ const resetZoom = () => {
   /* A4 纸张尺寸缩小80% */
   width: 635px;  /* 794px * 0.8 */
   height: 898px;  /* 1123px * 0.8 */
-  background: white;
+  background: #ccc;
   padding: 48px 40px;  /* 60px * 0.8, 50px * 0.8 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  align-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 1px;
   margin-bottom: 30px;
   position: relative;
 }
@@ -623,7 +623,7 @@ const resetZoom = () => {
 /* 字符单元格 */
 .char-cell {
   position: relative;
-  border: 1px solid #333;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -633,8 +633,8 @@ const resetZoom = () => {
 
 .char-cell.with-grid {
   background-image: 
-    linear-gradient(to right, #ddd 1px, transparent 1px),
-    linear-gradient(to bottom, #ddd 1px, transparent 1px);
+    linear-gradient(to right, #ccc 1px, transparent 1px),
+    linear-gradient(to bottom, #ccc 1px, transparent 1px);
   background-size: 50% 50%;
   background-position: 0 0;
 }
@@ -818,8 +818,12 @@ const resetZoom = () => {
   }
   
   .char-cell {
-    border: 1px solid #333 !important;
+    border-left: 1px solid #333 !important;
+    border-top: 1px solid #333 !important;
+    border-right: none !important;
+    border-bottom: none !important;
   }
+
   
   .page-number {
     display: block;
