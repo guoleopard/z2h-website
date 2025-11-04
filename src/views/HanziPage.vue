@@ -33,34 +33,37 @@
               }"
             >
               <div 
-                v-for="(char, index) in pageChars" 
-                :key="`${pageIndex}-${index}`"
-                class="char-cell"
-                :class="{ 
-                  'with-grid': settings.showGrid,
-                  'with-cross': settings.showCross,
-                  'is-trace': char && shouldTrace(index),
-                  'is-empty': !char
-                }"
-                :style="cellStyle"
-              >
-                <div v-if="settings.showPinyin && char" class="char-pinyin" :style="{ fontSize: cellStyle.pinyinFontSize }">
-                  {{ getPinyin(char) }}
-                </div>
-                <div 
-                  v-if="char"
-                  class="char-text"
-                  :style="{ 
-                    ...getCharStyle(index), 
-                    fontFamily: settings.fontFamily,
-                    '-webkit-text-stroke': '1px #222',
-                    'text-stroke': '1px #222',
-                    color: '#000000'
-                  }"
-                >
-                  {{ char }}
-                </div>
+              v-for="(char, index) in pageChars" 
+              :key="`${pageIndex}-${index}`"
+              class="char-cell"
+              :class="{ 
+                'with-grid': settings.showGrid,
+                'with-cross': settings.showCross,
+                'is-trace': char && shouldTrace(index),
+                'is-empty': !char
+              }"
+              :style="cellStyle"
+            >
+              <div v-if="settings.showStrokeOrder && char" class="char-stroke-order">
+                {{ strokeOrderMap[char]?.join(' ') || '' }}
               </div>
+              <div v-if="settings.showPinyin && char" class="char-pinyin" :style="{ fontSize: cellStyle.pinyinFontSize }">
+                {{ getPinyin(char) }}
+              </div>
+              <div 
+                v-if="char"
+                class="char-text"
+                :style="{ 
+                  ...getCharStyle(index), 
+                  fontFamily: settings.fontFamily,
+                  '-webkit-text-stroke': '1px #222',
+                  'text-stroke': '1px #222',
+                  color: '#000000'
+                }"
+              >
+                {{ char }}
+              </div>
+            </div>
               
               <!-- 页码 -->
               <!-- <div class="page-number">第 {{ pageIndex + 1 }} 页 / 共 {{ generatedPages.length }} 页</div> -->
@@ -97,6 +100,13 @@
                 <option value="'Microsoft YaHei', '微软雅黑', sans-serif">微软雅黑</option>
               </select>
             </div>
+            <div class="form-row">
+              <label class="form-label">字体大小</label>
+              <div class="range-control">
+                <input type="range" v-model="settings.fontSizeRatio" min="0.4" max="1.2" step="0.05" class="range-input">
+                <span class="range-value">{{ Math.round(settings.fontSizeRatio * 100) }}%</span>
+              </div>
+            </div>
 
           </section>
 
@@ -129,6 +139,10 @@
               <label class="checkbox-item">
                 <input type="checkbox" v-model="settings.showPinyin">
                 <span>显示拼音</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" v-model="settings.showStrokeOrder">
+                <span>显示笔顺</span>
               </label>
             </div>
           </section>
@@ -188,7 +202,9 @@ const settings = reactive({
   showCross: true,
   showPinyin: false,
   traceMode: 'first', // none, first, half, all
-  traceColor: '#cccccc'
+  traceColor: '#cccccc',
+  fontSizeRatio: 0.7, // 字体大小比例
+  showStrokeOrder: false // 是否显示笔顺
 })
 
 // 监听字体变化
@@ -210,7 +226,7 @@ const cellStyle = computed(() => {
   return {
     width: `${cellSize}px`,
     height: `${cellSize}px`,
-    fontSize: `${Math.floor(cellSize * 0.7)}px`,
+    fontSize: `${Math.floor(cellSize * settings.fontSizeRatio)}px`,
     pinyinFontSize: `${Math.floor(cellSize * 0.2)}px`,
     fontFamily: settings.fontFamily,
     color: '#000000'
@@ -321,6 +337,28 @@ const getPinyin = (char) => {
     '兰': 'lán', '亭': 'tíng'
   }
   return pinyinMap[char] || ''
+}
+
+// 笔顺数据
+const strokeOrderMap = {
+  '永': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏'],
+  '和': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍'],
+  '九': ['⒈', '⒉'],
+  '年': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍'],
+  '岁': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏'],
+  '在': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍'],
+  '癸': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏', '⒐', '⒑', '⒒', '⒓', '⒔', '⒕'],
+  '丑': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍'],
+  '暮': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏', '⒐', '⒑', '⒒', '⒓'],
+  '春': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏'],
+  '之': ['⒈', '⒉', '⒊'],
+  '初': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏'],
+  '会': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏'],
+  '于': ['⒈', '⒉', '⒊'],
+  '山': ['⒈', '⒉', '⒊'],
+  '阴': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏', '⒐', '⒑', '⒒', '⒓', '⒔', '⒕'],
+  '兰': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎'],
+  '亭': ['⒈', '⒉', '⒊', '⒋', '⒌', '⒍', '⒎', '⒏', '⒐', '⒑', '⒒', '⒓']
 }
 
 // 生成字帖
@@ -736,6 +774,17 @@ const resetZoom = () => {
   transform: translateX(-50%);
   color: #888;
   font-family: Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.char-stroke-order {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #888;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
   white-space: nowrap;
 }
 
