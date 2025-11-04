@@ -12,6 +12,9 @@
             <button @click="resetZoom" class="tool-btn" title="重置">⟲</button>
           </div>
         </div>
+        <!-- <div style="font-family: {{ settings.fontFamily }}; margin-bottom: 20px;">
+          测试字体：{{ settings.fontFamily }}
+        </div> -->
 
         <div class="preview-wrapper">
           <div 
@@ -24,6 +27,10 @@
               :key="pageIndex"
               ref="worksheetRef"
               class="worksheet-paper"
+              :style="{ 
+                gridTemplateColumns: `repeat(${settings.columns}, 1fr)`,
+                display: 'grid'
+              }"
             >
               <div 
                 v-for="(char, index) in pageChars" 
@@ -37,20 +44,26 @@
                 }"
                 :style="cellStyle"
               >
-                <div v-if="settings.showPinyin && char" class="char-pinyin">
+                <div v-if="settings.showPinyin && char" class="char-pinyin" :style="{ fontSize: cellStyle.pinyinFontSize }">
                   {{ getPinyin(char) }}
                 </div>
                 <div 
                   v-if="char"
                   class="char-text"
-                  :style="getCharStyle(index)"
+                  :style="{ 
+                    ...getCharStyle(index), 
+                    fontFamily: settings.fontFamily,
+                    '-webkit-text-stroke': '1px #222',
+                    'text-stroke': '1px #222',
+                    color: '#000000'
+                  }"
                 >
                   {{ char }}
                 </div>
               </div>
               
               <!-- 页码 -->
-              <div class="page-number">第 {{ pageIndex + 1 }} 页 / 共 {{ generatedPages.length }} 页</div>
+              <!-- <div class="page-number">第 {{ pageIndex + 1 }} 页 / 共 {{ generatedPages.length }} 页</div> -->
             </div>
           </div>
         </div>
@@ -84,6 +97,7 @@
                 <option value="'Microsoft YaHei', '微软雅黑', sans-serif">微软雅黑</option>
               </select>
             </div>
+
           </section>
 
           <!-- 布局设置 -->
@@ -160,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, watch } from 'vue'
 
 // 输入文字
 const inputText = ref('永和九年岁在癸丑暮春之初会于山阴之兰亭')
@@ -175,6 +189,11 @@ const settings = reactive({
   showPinyin: false,
   traceMode: 'first', // none, first, half, all
   traceColor: '#cccccc'
+})
+
+// 监听字体变化
+watch(() => settings.fontFamily, (newFont) => {
+  console.log('Font changed to:', newFont)
 })
 
 // 缩放级别
@@ -192,7 +211,9 @@ const cellStyle = computed(() => {
     width: `${cellSize}px`,
     height: `${cellSize}px`,
     fontSize: `${Math.floor(cellSize * 0.7)}px`,
-    fontFamily: settings.fontFamily
+    pinyinFontSize: `${Math.floor(cellSize * 0.2)}px`,
+    fontFamily: settings.fontFamily,
+    color: '#000000'
   }
 })
 
@@ -201,7 +222,7 @@ const rowsPerPage = computed(() => {
   // A4纸张可用高度：898px - 96px(上下边距) = 802px
   const availableHeight = 802
   const cellSize = Math.floor(555 / settings.columns)
-  return Math.floor(availableHeight / cellSize)
+  return Math.ceil(availableHeight / cellSize)
 })
 
 // 生成分页后的字符数组
@@ -239,6 +260,15 @@ const generatedPages = computed(() => {
   
   // 添加最后一页
   if (currentPage.length > 0) {
+    // 计算最后一页需要补充的空单元格数量
+    const totalCellsPerPage = rowsPerPage.value * settings.columns
+    const emptyCellsNeeded = totalCellsPerPage - currentPage.length
+    
+    // 如果需要补充空单元格，则添加空单元格
+    if (emptyCellsNeeded > 0) {
+      currentPage.push(...Array(emptyCellsNeeded).fill(''))
+    }
+    
     pages.push(currentPage)
   }
   
@@ -269,11 +299,15 @@ const getCharStyle = (index) => {
   if (shouldTrace(index)) {
     return {
       color: settings.traceColor,
-      opacity: 0.3
+      opacity: 0.3,
+      '-webkit-text-stroke': '1px #ff4444',
+      'text-stroke': '1px #ff4444'
     }
   }
   return {
-    color: 'transparent'
+    color: 'transparent',
+    '-webkit-text-stroke': '1px #222',
+    'text-stroke': '1px #222'
   }
 }
 
@@ -604,14 +638,14 @@ const resetZoom = () => {
   /* A4 纸张尺寸缩小80% */
   width: 635px;  /* 794px * 0.8 */
   height: 898px;  /* 1123px * 0.8 */
-  background: #ccc;
+  background: white;
   padding: 48px 40px;  /* 60px * 0.8, 50px * 0.8 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: repeat(10, 1fr);
-  gap: 1px;
+  gap: 0;
   margin-bottom: 30px;
   position: relative;
 }
@@ -623,7 +657,8 @@ const resetZoom = () => {
 /* 字符单元格 */
 .char-cell {
   position: relative;
-  border: none;
+  border: 0.2px solid #e0e0e0;
+  border-right: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -631,14 +666,43 @@ const resetZoom = () => {
   background: white;
 }
 
-.char-cell.with-grid {
-  background-image: 
-    linear-gradient(to right, #ccc 1px, transparent 1px),
-    linear-gradient(to bottom, #ccc 1px, transparent 1px);
-  background-size: 50% 50%;
-  background-position: 0 0;
+/* 最后一列的单元格显示右边框 */
+.char-cell:nth-child(12n) {
+  border-right: 0.2px solid #e0e0e0;
 }
 
+/* 田字格样式 */
+.char-cell.with-grid {
+  background-image: 
+    linear-gradient(to right, #e0e0e0 0.5px, transparent 0.5px),
+    linear-gradient(to bottom, #e0e0e0 0.5px, transparent 0.5px),
+    linear-gradient(to right, #e0e0e0 0.5px, transparent 0.5px),
+    linear-gradient(to bottom, #e0e0e0 0.5px, transparent 0.5px);
+  background-size: 50% 50%, 50% 50%, 100% 100%, 100% 100%;
+  background-position: 0 0, 0 0, 50% 50%, 50% 50%;
+  border: 0.5px solid #e0e0e0;
+}
+
+/* 字符样式 */
+.char-text {
+  font-weight: normal;
+  line-height: 1;
+  -webkit-text-stroke: 0.5px #333;
+  text-stroke: 0.5px #333;
+  position: relative;
+  z-index: 1;
+  font-family: 'KaiTi', '楷体', serif;
+  font-size: 28px;
+}
+
+/* 描红样式 */
+.char-cell.is-trace .char-text {
+  -webkit-text-stroke: 0.5px #ff6666;
+  text-stroke: 0.5px #ff6666;
+  color: rgba(255, 102, 102, 0.2);
+}
+
+/* 十字线样式 */
 .char-cell.with-cross::before,
 .char-cell.with-cross::after {
   content: '';
@@ -650,42 +714,45 @@ const resetZoom = () => {
   left: 50%;
   top: 0;
   bottom: 0;
-  width: 1px;
-  transform: translateX(-0.5px);
-  border-left: 1px dashed #ccc;
+  width: 0.5px;
+  transform: translateX(-0.25px);
+  border-left: 0.5px dashed #e0e0e0;
 }
 
 .char-cell.with-cross::after {
   top: 50%;
   left: 0;
   right: 0;
-  height: 1px;
-  transform: translateY(-0.5px);
-  border-top: 1px dashed #ccc;
+  height: 0.5px;
+  transform: translateY(-0.25px);
+  border-top: 0.5px dashed #e0e0e0;
 }
 
+/* 拼音样式 */
 .char-pinyin {
   position: absolute;
-  top: 2px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 10px;
-  color: #999;
+  color: #888;
   font-family: Arial, sans-serif;
+  white-space: nowrap;
 }
 
+/* 字符样式 */
 .char-text {
   font-weight: normal;
   line-height: 1;
-  -webkit-text-stroke: 1px #333;
-  text-stroke: 1px #333;
   position: relative;
   z-index: 1;
+  color: #000000;
 }
 
+/* 描红样式 */
 .char-cell.is-trace .char-text {
-  -webkit-text-stroke: 1px #ccc;
-  text-stroke: 1px #ccc;
+  -webkit-text-stroke: 1px #ff4444;
+  text-stroke: 1px #ff4444;
+  color: rgba(255, 68, 68, 0.3);
 }
 
 /* 页码 */
@@ -809,8 +876,6 @@ const resetZoom = () => {
     margin: 0;
     page-break-after: always;
     page-break-inside: avoid;
-    display: flex;
-    flex-wrap: wrap;
   }
   
   .worksheet-paper:last-child {
