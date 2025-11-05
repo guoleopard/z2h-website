@@ -4,6 +4,10 @@ import HanziPage from '../views/HanziPage.vue'
 import AlphabetPage from '../views/AlphabetPage.vue'
 import WordPage from '../views/WordPage.vue'
 import ParagraphPage from '../views/ParagraphPage.vue'
+import LoginPage from '../views/LoginPage.vue'
+import MembershipPage from '../views/MembershipPage.vue'
+import DonatePage from '../views/DonatePage.vue'
+import InvitePage from '../views/InvitePage.vue'
 
 const routes = [
   {
@@ -30,6 +34,26 @@ const routes = [
     path: '/paragraph',
     name: 'Paragraph',
     component: ParagraphPage
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginPage
+  },
+  {
+    path: '/membership',
+    name: 'Membership',
+    component: MembershipPage
+  },
+  {
+    path: '/donate',
+    name: 'Donate',
+    component: DonatePage
+  },
+  {
+    path: '/invite',
+    name: 'Invite',
+    component: InvitePage
   }
 ]
 
