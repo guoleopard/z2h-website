@@ -39,15 +39,30 @@
                 placeholder="请输入手机号"
                 class="form-input"
               />
-              <button class="code-btn">获取验证码</button>
+              <button class="code-btn" @click="sendVerificationCode">获取验证码</button>
             </div>
           </div>
           <div class="form-group">
-            <label for="verificationCode">验证码</label>
+            <label for="captcha">图形验证码</label>
+            <div class="captcha-container">
+              <input 
+                type="text" 
+                id="captcha" 
+                placeholder="请输入图形验证码"
+                class="form-input captcha-input"
+                v-model="userCaptcha"
+              />
+              <div class="captcha-code" @click="refreshCaptcha">
+                {{ captcha }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="verificationCode">短信验证码</label>
             <input 
               type="text" 
               id="verificationCode" 
-              placeholder="请输入验证码"
+              placeholder="请输入短信验证码"
               class="form-input"
             />
           </div>
@@ -65,15 +80,30 @@
                 placeholder="请输入邮箱"
                 class="form-input"
               />
-              <button class="code-btn">获取验证码</button>
+              <button class="code-btn" @click="sendVerificationCode">获取验证码</button>
             </div>
           </div>
           <div class="form-group">
-            <label for="emailCode">验证码</label>
+            <label for="emailCaptcha">图形验证码</label>
+            <div class="captcha-container">
+              <input 
+                type="text" 
+                id="emailCaptcha" 
+                placeholder="请输入图形验证码"
+                class="form-input captcha-input"
+                v-model="userCaptcha"
+              />
+              <div class="captcha-code" @click="refreshCaptcha">
+                {{ captcha }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="emailCode">邮箱验证码</label>
             <input 
               type="text" 
               id="emailCode" 
-              placeholder="请输入验证码"
+              placeholder="请输入邮箱验证码"
               class="form-input"
             />
           </div>
@@ -100,9 +130,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const activeTab = ref('phone')
+const captcha = ref('')
+const userCaptcha = ref('')
+
+// 生成随机验证码
+const generateCaptcha = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let result = ''
+  for (let i = 0; i < 4; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  captcha.value = result
+}
+
+// 初始化验证码
+onMounted(() => {
+  generateCaptcha()
+})
+
+// 点击刷新验证码
+const refreshCaptcha = () => {
+  generateCaptcha()
+}
+
+// 校验验证码
+const validateCaptcha = () => {
+  return userCaptcha.value.toLowerCase() === captcha.value.toLowerCase()
+}
+
+// 模拟发送验证码
+const sendVerificationCode = () => {
+  if (!validateCaptcha()) {
+    alert('验证码错误，请重新输入')
+    return
+  }
+  // 这里可以添加实际的发送验证码逻辑
+  alert('验证码发送成功')
+}
 </script>
 
 <style scoped>
@@ -194,6 +261,40 @@ const activeTab = ref('phone')
 .phone-input-container {
   display: flex;
   gap: 12px;
+}
+
+.email-input-container {
+  display: flex;
+  gap: 12px;
+}
+
+.captcha-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.captcha-input {
+  flex: 1;
+}
+
+.captcha-code {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s;
+}
+
+.captcha-code:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .code-btn {
