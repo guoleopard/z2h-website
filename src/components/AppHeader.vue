@@ -18,6 +18,8 @@
         <li><router-link to="/pinyin">拼音字帖</router-link></li>
         <li><router-link to="/pen-control">控笔练习</router-link></li>
         <li><router-link to="/donate" class="donate-link">💝捐助</router-link></li>
+        <li><router-link to="/login">登录</router-link></li>
+        <li><router-link to="/membership" class="donate-link">会员购买</router-link></li>
       </ul>
     </nav>
   </header>
