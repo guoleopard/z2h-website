@@ -58,12 +58,8 @@
                   fontFamily: settings.fontFamily,
                   '-webkit-text-stroke': '1px #222',
                   'text-stroke': '1px #222',
-<<<<<<< HEAD
                   color: '#000000',
                   fontSize: cellStyle.fontSize
-=======
-                  color: '#000000'
->>>>>>> 3dce9f34f925c3fde45b649564155c4cdf99dbbb
                 }"
               >
                 {{ char }}
