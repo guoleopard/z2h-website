@@ -8,6 +8,7 @@ import LoginPage from '../views/LoginPage.vue'
 import MembershipPage from '../views/MembershipPage.vue'
 import DonatePage from '../views/DonatePage.vue'
 import InvitePage from '../views/InvitePage.vue'
+import ProfilePage from '../views/ProfilePage.vue'
 
 const routes = [
   {
@@ -54,6 +55,11 @@ const routes = [
     path: '/invite',
     name: 'Invite',
     component: InvitePage
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage
   }
 ]
 
