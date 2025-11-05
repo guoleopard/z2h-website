@@ -2,7 +2,7 @@
   <header class="header">
     <nav class="nav">
       <div class="nav-brand">
-        <router-link to="/" class="brand-link">Z2H字帖</router-link>
+        <router-link to="/" class="brand-link">Z2H2字帖</router-link>
       </div>
       <ul class="nav-menu">
         <li><router-link to="/hanzi">语文字帖</router-link></li>

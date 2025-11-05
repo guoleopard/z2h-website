@@ -58,19 +58,22 @@
         <div v-if="activeTab === 'email'" class="form-content">
           <div class="form-group">
             <label for="email">邮箱</label>
-            <input 
-              type="email" 
-              id="email" 
-              placeholder="请输入邮箱"
-              class="form-input"
-            />
+            <div class="email-input-container">
+              <input 
+                type="email" 
+                id="email" 
+                placeholder="请输入邮箱"
+                class="form-input"
+              />
+              <button class="code-btn">获取验证码</button>
+            </div>
           </div>
           <div class="form-group">
-            <label for="password">密码</label>
+            <label for="emailCode">验证码</label>
             <input 
-              type="password" 
-              id="password" 
-              placeholder="请输入密码"
+              type="text" 
+              id="emailCode" 
+              placeholder="请输入验证码"
               class="form-input"
             />
           </div>
