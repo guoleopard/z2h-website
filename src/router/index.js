@@ -6,8 +6,10 @@ import WordPage from '../views/WordPage.vue'
 import ParagraphPage from '../views/ParagraphPage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import MembershipPage from '../views/MembershipPage.vue'
+import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import DonatePage from '../views/DonatePage.vue'
 import InvitePage from '../views/InvitePage.vue'
+import ProfilePage from '../views/ProfilePage.vue'
 
 const routes = [
   {
@@ -41,6 +43,11 @@ const routes = [
     component: LoginPage
   },
   {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPasswordPage
+  },
+  {
     path: '/membership',
     name: 'Membership',
     component: MembershipPage
@@ -54,6 +61,11 @@ const routes = [
     path: '/invite',
     name: 'Invite',
     component: InvitePage
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage
   }
 ]
 

@@ -5,32 +5,25 @@
       <p class="donate-description">
         如果本站对你有些许帮助，那就小小赞助一下吧^_^
       </p>
-      <p class="donate-note">
+      <!-- <p class="donate-note">
         如有需要可加我微信（willick）交流，有问必答
-      </p>
+      </p> -->
 
       <div class="donate-methods">
-        <h2 class="section-title">捐赠方式</h2>
         
         <div class="donate-method">
           <div class="method-icon">💳</div>
-          <div class="method-info">
-            <h3 class="method-name">微信支付</h3>
-            <p class="method-desc">扫一扫下方二维码</p>
-          </div>
           <div class="qr-code">
-            <div class="qr-placeholder">微信二维码</div>
+            <img v-if="wechatQrCode" :src="wechatQrCode" alt="微信二维码" class="qr-image">
+            <div v-else class="qr-placeholder">微信二维码</div>
           </div>
         </div>
 
         <div class="donate-method">
           <div class="method-icon">📱</div>
-          <div class="method-info">
-            <h3 class="method-name">支付宝</h3>
-            <p class="method-desc">扫一扫下方二维码</p>
-          </div>
           <div class="qr-code">
-            <div class="qr-placeholder">支付宝二维码</div>
+            <img v-if="alipayQrCode" :src="alipayQrCode" alt="支付宝二维码" class="qr-image">
+            <div v-else class="qr-placeholder">支付宝二维码</div>
           </div>
         </div>
       </div>
@@ -46,11 +39,37 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+
+// 用于存储二维码图片地址的响应式变量
+const wechatQrCode = ref('');
+const alipayQrCode = ref('');
+
+// 组件挂载时调用接口获取二维码图片地址
+onMounted(async () => {
+  try {
+    // 这里可以替换为实际的 API 调用
+    // 示例：
+    // const response = await fetch('/api/qr-codes');
+    // const data = await response.json();
+    // wechatQrCode.value = data.wechat;
+    // alipayQrCode.value = data.alipay;
+    
+    // 临时使用占位符图片
+    wechatQrCode.value = 'https://pic.tjanxunda.com/gqj/weixin.jpg';
+    alipayQrCode.value = 'https://pic.tjanxunda.com/gqj/zhifubao.jpg';
+  } catch (error) {
+    console.error('获取二维码失败:', error);
+    // 失败时显示默认提示
+    wechatQrCode.value = '';
+    alipayQrCode.value = '';
+  }
+});
 </script>
 
 <style scoped>
 .donate-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 60px 20px;
   min-height: calc(100vh - 64px);
@@ -96,60 +115,76 @@
 
 .donate-methods {
   margin-bottom: 48px;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .donate-method {
+  flex: 1;
+  min-width: 300px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding: 24px;
+  gap: 20px;
+  padding: 32px;
   background: #f9fafb;
   border-radius: 12px;
-  margin-bottom: 20px;
   transition: all 0.3s;
+  text-align: center;
 }
 
 .donate-method:hover {
   background: #f3f4f6;
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .method-icon {
-  font-size: 48px;
+  font-size: 64px;
 }
 
 .method-info {
-  flex: 1;
+  width: 100%;
 }
 
 .method-name {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .method-desc {
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
 }
 
 .qr-code {
-  width: 150px;
-  height: 150px;
+  width: 300px;
+  height: 300px;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .qr-placeholder {
-  font-size: 14px;
+  font-size: 16px;
   color: #9ca3af;
   text-align: center;
   padding: 20px;
+}
+
+.qr-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 .donate-thanks {
@@ -171,14 +206,18 @@
     font-size: 28px;
   }
   
-  .donate-method {
+  .donate-methods {
     flex-direction: column;
-    text-align: center;
+  }
+  
+  .donate-method {
+    width: 100%;
+    min-width: auto;
   }
   
   .qr-code {
-    width: 120px;
-    height: 120px;
+    width: 250px;
+    height: 250px;
   }
 }
 </style>

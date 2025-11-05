@@ -1,7 +1,8 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h2 class="login-title">用户登录</h2>
+  <div class="forgot-password-container">
+    <div class="forgot-password-card">
+      <h2 class="forgot-password-title">忘记密码</h2>
+      <p class="forgot-password-subtitle">请选择找回密码的方式</p>
       
       <div class="tab-container">
         <div 
@@ -9,46 +10,36 @@
           :class="{ active: activeTab === 'phone' }"
           @click="activeTab = 'phone'"
         >
-          手机号登录
+          手机号找回
         </div>
         <div 
           class="tab-item" 
           :class="{ active: activeTab === 'email' }"
           @click="activeTab = 'email'"
         >
-          邮箱登录
-        </div>
-        <div 
-          class="tab-item" 
-          :class="{ active: activeTab === 'wechat' }"
-          @click="activeTab = 'wechat'"
-        >
-          微信登录
+          邮箱找回
         </div>
       </div>
 
-      <div class="login-form">
-        <!-- 手机号登录 -->
+      <div class="forgot-password-form">
+        <!-- 手机号找回 -->
         <div v-if="activeTab === 'phone'" class="form-content">
           <div class="form-group">
             <label for="phone">手机号</label>
-            <div class="phone-input-container">
-              <input 
-                type="tel" 
-                id="phone" 
-                placeholder="请输入手机号"
-                class="form-input"
-              />
-              <button class="code-btn" @click="sendVerificationCode">获取验证码</button>
-            </div>
+            <input 
+              type="tel" 
+              id="phone" 
+              placeholder="请输入手机号" 
+              class="form-input"
+            />
           </div>
           <div class="form-group">
-            <label for="captcha">图形验证码</label>
+            <label for="phoneCaptcha">图形验证码</label>
             <div class="captcha-container">
               <input 
                 type="text" 
-                id="captcha" 
-                placeholder="请输入图形验证码"
+                id="phoneCaptcha" 
+                placeholder="请输入图形验证码" 
                 class="form-input captcha-input"
                 v-model="userCaptcha"
               />
@@ -58,30 +49,48 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="verificationCode">短信验证码</label>
+            <label for="phoneVerificationCode">短信验证码</label>
+            <div class="code-container">
+              <input 
+                type="text" 
+                id="phoneVerificationCode" 
+                placeholder="请输入短信验证码" 
+                class="form-input"
+              />
+              <button class="code-btn" @click="sendPhoneCode">获取验证码</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="newPhonePassword">新密码</label>
             <input 
-              type="text" 
-              id="verificationCode" 
-              placeholder="请输入短信验证码"
+              type="password" 
+              id="newPhonePassword" 
+              placeholder="请输入新密码" 
               class="form-input"
             />
           </div>
-          <button class="login-btn">登录</button>
+          <div class="form-group">
+            <label for="confirmPhonePassword">确认新密码</label>
+            <input 
+              type="password" 
+              id="confirmPhonePassword" 
+              placeholder="请确认新密码" 
+              class="form-input"
+            />
+          </div>
+          <button class="reset-btn">重置密码</button>
         </div>
 
-        <!-- 邮箱登录 -->
+        <!-- 邮箱找回 -->
         <div v-if="activeTab === 'email'" class="form-content">
           <div class="form-group">
             <label for="email">邮箱</label>
-            <div class="email-input-container">
-              <input 
-                type="email" 
-                id="email" 
-                placeholder="请输入邮箱"
-                class="form-input"
-              />
-              <button class="code-btn" @click="sendVerificationCode">获取验证码</button>
-            </div>
+            <input 
+              type="email" 
+              id="email" 
+              placeholder="请输入邮箱" 
+              class="form-input"
+            />
           </div>
           <div class="form-group">
             <label for="emailCaptcha">图形验证码</label>
@@ -89,7 +98,7 @@
               <input 
                 type="text" 
                 id="emailCaptcha" 
-                placeholder="请输入图形验证码"
+                placeholder="请输入图形验证码" 
                 class="form-input captcha-input"
                 v-model="userCaptcha"
               />
@@ -99,33 +108,42 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="emailCode">邮箱验证码</label>
+            <label for="emailVerificationCode">邮箱验证码</label>
+            <div class="code-container">
+              <input 
+                type="text" 
+                id="emailVerificationCode" 
+                placeholder="请输入邮箱验证码" 
+                class="form-input"
+              />
+              <button class="code-btn" @click="sendEmailCode">获取验证码</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="newEmailPassword">新密码</label>
             <input 
-              type="text" 
-              id="emailCode" 
-              placeholder="请输入邮箱验证码"
+              type="password" 
+              id="newEmailPassword" 
+              placeholder="请输入新密码" 
               class="form-input"
             />
           </div>
-          <button class="login-btn">登录</button>
-        </div>
-
-        <!-- 微信登录 -->
-        <div v-if="activeTab === 'wechat'" class="form-content">
-          <div class="wechat-qr">
-            <div class="qr-placeholder">
-              <span class="qr-icon">📱</span>
-              <p>微信扫码登录</p>
-              <p class="qr-tip">请使用微信扫一扫上方二维码</p>
-            </div>
+          <div class="form-group">
+            <label for="confirmEmailPassword">确认新密码</label>
+            <input 
+              type="password" 
+              id="confirmEmailPassword" 
+              placeholder="请确认新密码" 
+              class="form-input"
+            />
           </div>
+          <button class="reset-btn">重置密码</button>
         </div>
       </div>
 
-      <div class="login-footer">
-    <p>还没有账号？<router-link to="/register" class="register-link">立即注册</router-link></p>
-    <!-- <p style="margin-top: 12px;"><router-link to="/forgot-password" class="forgot-password-link">忘记密码？</router-link></p> -->
-  </div>
+      <div class="forgot-password-footer">
+        <p>想起密码了？<router-link to="/login" class="login-link">返回登录</router-link></p>
+      </div>
     </div>
   </div>
 </template>
@@ -162,19 +180,29 @@ const validateCaptcha = () => {
   return userCaptcha.value.toLowerCase() === captcha.value.toLowerCase()
 }
 
-// 模拟发送验证码
-const sendVerificationCode = () => {
+// 模拟发送手机验证码
+const sendPhoneCode = () => {
   if (!validateCaptcha()) {
     alert('验证码错误，请重新输入')
     return
   }
-  // 这里可以添加实际的发送验证码逻辑
-  alert('验证码发送成功')
+  // 这里可以添加实际的发送手机验证码逻辑
+  alert('手机验证码发送成功')
+}
+
+// 模拟发送邮箱验证码
+const sendEmailCode = () => {
+  if (!validateCaptcha()) {
+    alert('验证码错误，请重新输入')
+    return
+  }
+  // 这里可以添加实际的发送邮箱验证码逻辑
+  alert('邮箱验证码发送成功')
 }
 </script>
 
 <style scoped>
-.login-container {
+.forgot-password-container {
   min-height: calc(100vh - 64px);
   display: flex;
   align-items: center;
@@ -183,7 +211,7 @@ const sendVerificationCode = () => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.login-card {
+.forgot-password-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -192,12 +220,19 @@ const sendVerificationCode = () => {
   padding: 32px;
 }
 
-.login-title {
+.forgot-password-title {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
   color: #1f2937;
   font-size: 28px;
   font-weight: 700;
+}
+
+.forgot-password-subtitle {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .tab-container {
@@ -225,7 +260,7 @@ const sendVerificationCode = () => {
   border-bottom: 2px solid #667eea;
 }
 
-.login-form {
+.forgot-password-form {
   margin-bottom: 24px;
 }
 
@@ -259,16 +294,6 @@ const sendVerificationCode = () => {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.phone-input-container {
-  display: flex;
-  gap: 12px;
-}
-
-.email-input-container {
-  display: flex;
-  gap: 12px;
-}
-
 .captcha-container {
   display: flex;
   gap: 12px;
@@ -298,6 +323,11 @@ const sendVerificationCode = () => {
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
+.code-container {
+  display: flex;
+  gap: 12px;
+}
+
 .code-btn {
   padding: 12px 20px;
   background: #667eea;
@@ -314,7 +344,7 @@ const sendVerificationCode = () => {
   background: #5568d3;
 }
 
-.login-btn {
+.reset-btn {
   width: 100%;
   padding: 14px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -327,63 +357,32 @@ const sendVerificationCode = () => {
   transition: all 0.3s;
 }
 
-.login-btn:hover {
+.reset-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
-.wechat-qr {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 0;
-}
-
-.qr-placeholder {
-  text-align: center;
-  padding: 30px;
-  border: 2px dashed #e5e7eb;
-  border-radius: 12px;
-}
-
-.qr-icon {
-  font-size: 64px;
-  display: block;
-  margin-bottom: 16px;
-}
-
-.qr-placeholder p {
-  margin: 8px 0;
-  color: #374151;
-  font-weight: 500;
-}
-
-.qr-tip {
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.login-footer {
+.forgot-password-footer {
   text-align: center;
   color: #6b7280;
 }
 
-.register-link {
+.login-link {
   color: #667eea;
   text-decoration: none;
   font-weight: 600;
 }
 
-.register-link:hover {
+.login-link:hover {
   text-decoration: underline;
 }
 
 @media (max-width: 480px) {
-  .login-card {
+  .forgot-password-card {
     padding: 24px;
   }
   
-  .login-title {
+  .forgot-password-title {
     font-size: 24px;
   }
 }
