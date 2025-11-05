@@ -58,7 +58,8 @@
                   fontFamily: settings.fontFamily,
                   '-webkit-text-stroke': '1px #222',
                   'text-stroke': '1px #222',
-                  color: '#000000'
+                  color: '#000000',
+                  fontSize: cellStyle.fontSize
                 }"
               >
                 {{ char }}
@@ -78,14 +79,35 @@
           <!-- 输入文字 -->
           <section class="control-section">
             <h3 class="section-title">输入文字</h3>
-            <textarea 
-              v-model="inputText" 
-              placeholder="请输入要练习的汉字，每个汉字会重复多次..."
-              class="text-input"
-              rows="5"
-            ></textarea>
-            <div class="input-hint">提示：可以输入任意汉字，系统会自动生成练习字帖</div>
+            <button @click="showInputDialog = true" class="btn btn-primary">
+              <span class="btn-icon">✏️</span>
+              输入内容
+            </button>
+            <div class="input-hint">提示：点击按钮输入要练习的汉字，支持换行</div>
           </section>
+
+          <!-- 输入对话框 -->
+          <div v-if="showInputDialog" class="dialog-overlay" @click="showInputDialog = false">
+            <div class="dialog-content" @click.stop>
+              <div class="dialog-header">
+                <h3>输入内容</h3>
+                <button @click="showInputDialog = false" class="close-btn">×</button>
+              </div>
+              <div class="dialog-body">
+                <textarea 
+                  v-model="dialogInputText" 
+                  placeholder="请输入要练习的汉字，例如'你好世界'，支持插入空行。"
+                  class="dialog-textarea"
+                  rows="10"
+                  autofocus
+                ></textarea>
+              </div>
+              <div class="dialog-footer">
+                <button @click="showInputDialog = false" class="btn btn-outline">取消</button>
+                <button @click="confirmInput" class="btn btn-primary">确定</button>
+              </div>
+            </div>
+          </div>
 
           <!-- 字体样式 -->
           <section class="control-section">
@@ -128,10 +150,10 @@
           <section class="control-section">
             <h3 class="section-title">田字格设置</h3>
             <div class="checkbox-list">
-              <label class="checkbox-item">
+              <!-- <label class="checkbox-item">
                 <input type="checkbox" v-model="settings.showGrid">
                 <span>显示田字格</span>
-              </label>
+              </label> -->
               <label class="checkbox-item">
                 <input type="checkbox" v-model="settings.showCross">
                 <span>显示十字线</span>
@@ -192,6 +214,14 @@ import { ref, computed, reactive, watch } from 'vue'
 
 // 输入文字
 const inputText = ref('永和九年岁在癸丑暮春之初会于山阴之兰亭')
+const showInputDialog = ref(false)
+const dialogInputText = ref('')
+
+// 确认输入
+const confirmInput = () => {
+  inputText.value = dialogInputText.value
+  showInputDialog.value = false
+}
 
 // 设置项
 const settings = reactive({
@@ -243,35 +273,57 @@ const rowsPerPage = computed(() => {
 
 // 生成分页后的字符数组
 const generatedPages = computed(() => {
-  const chars = inputText.value.split('').filter(c => c.trim())
+  // 将输入内容按行分割
+  const lines = inputText.value.split('\n').filter(line => line.trim())
   const pages = []
   let currentPage = []
   let currentRowCount = 0
   
-  chars.forEach(char => {
-    // 每个字重复指定次数
-    const charRow = []
-    for (let i = 0; i < settings.repeatCount; i++) {
-      charRow.push(char)
-    }
-    // 补充空格填满这一行
-    const emptyCount = settings.columns - (settings.repeatCount % settings.columns)
-    if (emptyCount < settings.columns) {
-      for (let i = 0; i < emptyCount; i++) {
-        charRow.push('')
+  lines.forEach(line => {
+    // 将每行文字拆分为字符
+    const chars = line.split('').filter(c => c.trim())
+    
+    // 处理当前行的每个字符
+    chars.forEach(char => {
+      // 每个字重复指定次数
+      const charRow = []
+      for (let i = 0; i < settings.repeatCount; i++) {
+        charRow.push(char)
       }
-    }
+      // 补充空格填满这一行
+      const emptyCount = settings.columns - (settings.repeatCount % settings.columns)
+      if (emptyCount < settings.columns) {
+        for (let i = 0; i < emptyCount; i++) {
+          charRow.push('')
+        }
+      }
+      
+      // 检查是否需要换页
+      if (currentRowCount >= rowsPerPage.value) {
+        pages.push(currentPage)
+        currentPage = []
+        currentRowCount = 0
+      }
+      
+      // 添加当前行到当前页
+      currentPage.push(...charRow)
+      currentRowCount++
+    })
     
-    // 检查是否需要换页
-    if (currentRowCount >= rowsPerPage.value) {
-      pages.push(currentPage)
-      currentPage = []
-      currentRowCount = 0
+    // 如果当前行是空行，添加一个空行到字帖
+    if (chars.length === 0) {
+      // 检查是否需要换页
+      if (currentRowCount >= rowsPerPage.value) {
+        pages.push(currentPage)
+        currentPage = []
+        currentRowCount = 0
+      }
+      
+      // 添加空行
+      const emptyRow = Array(settings.columns).fill('')
+      currentPage.push(...emptyRow)
+      currentRowCount++
     }
-    
-    // 添加当前行到当前页
-    currentPage.push(...charRow)
-    currentRowCount++
   })
   
   // 添加最后一页
@@ -442,21 +494,7 @@ const resetZoom = () => {
 }
 
 /* 文本输入 */
-.text-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
-  transition: border-color 0.3s;
-}
 
-.text-input:focus {
-  outline: none;
-  border-color: #667eea;
-}
 
 .input-hint {
   margin-top: 8px;
@@ -466,6 +504,98 @@ const resetZoom = () => {
 }
 
 /* 表单行 */
+/* 对话框样式 */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dialog-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+}
+
+.dialog-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.dialog-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 150px;
+  font-family: inherit;
+}
+
+.dialog-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.dialog-footer {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
 .form-row {
   margin-bottom: 10px;
 }
@@ -730,7 +860,6 @@ const resetZoom = () => {
   position: relative;
   z-index: 1;
   font-family: 'KaiTi', '楷体', serif;
-  font-size: 28px;
 }
 
 /* 描红样式 */
