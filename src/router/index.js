@@ -11,12 +11,18 @@ import DonatePage from '../views/DonatePage.vue'
 import InvitePage from '../views/InvitePage.vue'
 import ProfilePage from '../views/ProfilePage.vue'
 import NumberPage from '../views/NumberPage.vue'
+import PinyinPage from '../views/PinyinPage.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/pinyin',
+    name: 'Pinyin',
+    component: PinyinPage
   },
   {
     path: '/hanzi',
