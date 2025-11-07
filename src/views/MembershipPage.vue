@@ -6,77 +6,49 @@
     </div>
 
     <div class="membership-cards">
-      <!-- 月会员 -->
-      <div class="card monthly">
-        <div class="card-header">
-          <div class="badge">月会员</div>
-        </div>
-        <div class="card-body">
-          <div class="price">
-            <span class="amount">¥19</span>
-            <span class="period">/月</span>
-          </div>
-          <div class="benefits">
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">无限制访问所有字帖</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">无广告干扰</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">下载高清字帖PDF</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">优先体验新功能</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">专属客服支持</span>
-            </div>
-          </div>
-          <button class="buy-btn">立即购买</button>
-        </div>
+      <!-- 加载状态 -->
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>加载会员套餐中...</p>
       </div>
-
-      <!-- 年会员 -->
-      <div class="card annual popular">
+      
+      <!-- 错误信息 -->
+      <div v-if="error && !loading" class="error-state">
+        <p>{{ error }}</p>
+      </div>
+      
+      <!-- 会员套餐卡片 -->
+      <div 
+        v-for="plan in plans" 
+        :key="plan.id"
+        :class="['card', plan.name === '月会员' ? 'monthly' : 'annual', plan.popular ? 'popular' : '']"
+      >
         <div class="card-header">
-          <div class="badge popular-badge">年会员</div>
-          <div class="discount">立省¥78</div>
+          <div :class="['badge', plan.popular ? 'popular-badge' : '']">{{ plan.name }}</div>
+          <div v-if="plan.discount" class="discount">{{ plan.discount }}</div>
         </div>
         <div class="card-body">
           <div class="price">
-            <span class="amount">¥159</span>
-            <span class="period">/年</span>
+            <span class="amount">¥{{ plan.price }}</span>
+            <span class="period">/{{ plan.period }}</span>
           </div>
-          <div class="original-price">原价 ¥237</div>
+          <div v-if="plan.originalPrice" class="original-price">原价 ¥{{ plan.originalPrice }}</div>
           <div class="benefits">
-            <div class="benefit-item">
+            <div 
+              v-for="(benefit, index) in plan.benefits" 
+              :key="index"
+              class="benefit-item"
+            >
               <span class="benefit-icon">✅</span>
-              <span class="benefit-text">所有月会员权益</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">额外赠送2个月</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">专属学习计划</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">高级数据分析</span>
-            </div>
-            <div class="benefit-item">
-              <span class="benefit-icon">✅</span>
-              <span class="benefit-text">离线使用功能</span>
+              <span class="benefit-text">{{ benefit }}</span>
             </div>
           </div>
-          <button class="buy-btn popular-btn">立即购买</button>
+          <button 
+            :class="['buy-btn', plan.popular ? 'popular-btn' : '']"
+            @click="purchasePlan(plan.id)"
+          >
+            立即购买
+          </button>
         </div>
       </div>
     </div>
@@ -104,6 +76,96 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { membershipApi } from '../api'
+
+// 会员套餐数据
+const plans = ref([])
+// 加载状态
+const loading = ref(true)
+// 错误信息
+const error = ref('')
+
+// 购买会员
+const purchasePlan = async (planId) => {
+  try {
+    const response = await membershipApi.purchaseMembership({ 
+      planId,
+      paymentMethod: 'wechat' // 或 'alipay'、'card'，根据实际情况调整
+    })
+    // 处理支付逻辑，例如跳转到支付页面或显示支付二维码
+    console.log('购买成功:', response)
+    alert('购买成功！会员已开通')
+  } catch (error) {
+    console.error('购买失败:', error)
+    alert('购买失败，请稍后重试')
+  }
+}
+
+// 获取会员套餐
+const fetchPlans = async () => {
+  try {
+    loading.value = true
+    const response = await membershipApi.getMembershipPlans()
+    // 将API返回的数据更新到plans
+    if (response.data && response.data.length > 0) {
+      plans.value = response.data
+    } else {
+      // 如果API返回为空，使用默认数据
+      plans.value = [
+        {
+          id: 1,
+          name: '月会员',
+          price: 19,
+          period: '月',
+          benefits: ['无限制访问所有字帖', '无广告干扰', '下载高清字帖PDF', '优先体验新功能', '专属客服支持'],
+          popular: false
+        },
+        {
+          id: 2,
+          name: '年会员',
+          price: 159,
+          period: '年',
+          originalPrice: 237,
+          discount: '立省¥78',
+          benefits: ['所有月会员权益', '额外赠送2个月', '专属学习计划', '高级数据分析', '离线使用功能'],
+          popular: true
+        }
+      ]
+    }
+  } catch (err) {
+    console.error('获取会员套餐失败:', err)
+    error.value = '获取会员套餐失败，请稍后重试'
+    // 使用默认数据
+    plans.value = [
+      {
+        id: 1,
+        name: '月会员',
+        price: 19,
+        period: '月',
+        benefits: ['无限制访问所有字帖', '无广告干扰', '下载高清字帖PDF', '优先体验新功能', '专属客服支持'],
+        popular: false
+      },
+      {
+        id: 2,
+        name: '年会员',
+        price: 159,
+        period: '年',
+        originalPrice: 237,
+        discount: '立省¥78',
+        benefits: ['所有月会员权益', '额外赠送2个月', '专属学习计划', '高级数据分析', '离线使用功能'],
+        popular: true
+      }
+    ]
+  } finally {
+    loading.value = false
+  }
+}
+
+// 页面加载时获取会员套餐
+onMounted(() => {
+  fetchPlans()
+})
 </script>
 
 <style scoped>
@@ -149,6 +211,37 @@
 .card:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* 加载状态 */
+.loading-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误状态 */
+.error-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #ef4444;
+  font-size: 18px;
 }
 
 .card.monthly {

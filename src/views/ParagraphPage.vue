@@ -207,8 +207,28 @@ const downloadImage = () => {
 
 // 打印功能
 const printWorksheet = () => {
-  // 实现打印逻辑
-  alert('打印功能开发中...')
+  // 创建一个打印容器
+  const printContainer = document.createElement('div');
+  printContainer.style.position = 'absolute';
+  printContainer.style.left = '-9999px';
+  printContainer.style.top = '-9999px';
+  
+  // 复制所有字帖纸张到打印容器
+  const worksheetPapers = document.querySelectorAll('.worksheet-paper');
+  worksheetPapers.forEach(paper => {
+    printContainer.appendChild(paper.cloneNode(true));
+  });
+  
+  // 添加打印容器到页面
+  document.body.appendChild(printContainer);
+  
+  // 执行打印
+  window.print();
+  
+  // 打印完成后移除打印容器
+  setTimeout(() => {
+    document.body.removeChild(printContainer);
+  }, 100);
 }
 </script>
 
@@ -590,5 +610,86 @@ const printWorksheet = () => {
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+/* 打印样式 */
+@media print {
+  /* 隐藏页面其他部分 */
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+  
+  /* 页面基础样式 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .paragraph-page {
+    background: white;
+    min-height: auto;
+  }
+  
+  .page-container {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  
+  /* 隐藏所有非字帖内容 */
+  .sidebar,
+  .preview-header {
+    display: none !important;
+  }
+  
+  .main-content {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    display: block;
+  }
+  
+  .preview-wrapper {
+    padding: 0;
+    background: white;
+    display: block;
+    overflow: visible;
+  }
+  
+  .preview-container {
+    transform: none !important;
+    display: block;
+  }
+  
+  .worksheet-paper {
+    box-shadow: none;
+    width: 210mm;
+    height: 297mm;
+    padding: 15mm;
+    margin: 0;
+    page-break-after: always;
+    page-break-inside: avoid;
+    background: white;
+  }
+  
+  .worksheet-paper:last-child {
+    page-break-after: auto;
+  }
+  
+  .paragraph-content {
+    font-size: 16pt !important;
+    line-height: 2 !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
 }
 </style>

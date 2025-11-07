@@ -38,6 +38,7 @@
                 id="phone" 
                 placeholder="请输入手机号"
                 class="form-input"
+                v-model="phone"
               />
               <button class="code-btn" @click="sendVerificationCode">获取验证码</button>
             </div>
@@ -64,9 +65,10 @@
               id="verificationCode" 
               placeholder="请输入短信验证码"
               class="form-input"
+              v-model="verificationCode"
             />
           </div>
-          <button class="login-btn">登录</button>
+          <button class="login-btn" @click="login">登录</button>
         </div>
 
         <!-- 邮箱登录 -->
@@ -79,6 +81,7 @@
                 id="email" 
                 placeholder="请输入邮箱"
                 class="form-input"
+                v-model="email"
               />
               <button class="code-btn" @click="sendVerificationCode">获取验证码</button>
             </div>
@@ -105,9 +108,10 @@
               id="emailCode" 
               placeholder="请输入邮箱验证码"
               class="form-input"
+              v-model="verificationCode"
             />
           </div>
-          <button class="login-btn">登录</button>
+          <button class="login-btn" @click="login">登录</button>
         </div>
 
         <!-- 微信登录 -->
@@ -132,10 +136,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { userApi } from '../api'
 
 const activeTab = ref('phone')
 const captcha = ref('')
 const userCaptcha = ref('')
+const phone = ref('')
+const email = ref('')
+const verificationCode = ref('')
 
 // 生成随机验证码
 const generateCaptcha = () => {
@@ -162,14 +170,57 @@ const validateCaptcha = () => {
   return userCaptcha.value.toLowerCase() === captcha.value.toLowerCase()
 }
 
-// 模拟发送验证码
-const sendVerificationCode = () => {
+// 发送验证码
+const sendVerificationCode = async () => {
   if (!validateCaptcha()) {
     alert('验证码错误，请重新输入')
     return
   }
-  // 这里可以添加实际的发送验证码逻辑
-  alert('验证码发送成功')
+  
+  try {
+    if (activeTab.value === 'phone') {
+      if (!phone.value) {
+        alert('请输入手机号')
+        return
+      }
+      await userApi.sendSmsCode({ phone: phone.value, captcha: userCaptcha.value })
+      alert('短信验证码发送成功')
+    } else if (activeTab.value === 'email') {
+      if (!email.value) {
+        alert('请输入邮箱')
+        return
+      }
+      await userApi.sendEmailCode({ email: email.value, captcha: userCaptcha.value })
+      alert('邮箱验证码发送成功')
+    }
+  } catch (error) {
+    alert(error.message)
+  }
+}
+
+// 登录
+const login = async () => {
+  try {
+    let loginData = {}
+    
+    if (activeTab.value === 'phone') {
+      loginData = { phone: phone.value, code: verificationCode.value }
+    } else if (activeTab.value === 'email') {
+      loginData = { email: email.value, code: verificationCode.value }
+    } else if (activeTab.value === 'wechat') {
+      // 微信登录逻辑
+      alert('微信登录功能开发中')
+      return
+    }
+    
+    const response = await userApi.login(loginData)
+    localStorage.setItem('token', response.token)
+    alert('登录成功')
+    // 跳转到首页
+    window.location.href = '/'
+  } catch (error) {
+    alert(error.message)
+  }
 }
 </script>
 

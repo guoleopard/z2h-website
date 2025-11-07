@@ -426,7 +426,28 @@ const downloadImage = () => {
 
 // 打印字帖
 const printWorksheet = () => {
-  window.print()
+  // 创建一个打印容器
+  const printContainer = document.createElement('div');
+  printContainer.style.position = 'absolute';
+  printContainer.style.left = '-9999px';
+  printContainer.style.top = '-9999px';
+  
+  // 复制所有字帖纸张到打印容器
+  const worksheetPapers = document.querySelectorAll('.worksheet-paper');
+  worksheetPapers.forEach(paper => {
+    printContainer.appendChild(paper.cloneNode(true));
+  });
+  
+  // 添加打印容器到页面
+  document.body.appendChild(printContainer);
+  
+  // 执行打印
+  window.print();
+  
+  // 打印完成后移除打印容器
+  setTimeout(() => {
+    document.body.removeChild(printContainer);
+  }, 100);
 }
 
 // 缩放控制
@@ -450,47 +471,49 @@ const resetZoom = () => {
 <style scoped>
 /* 页面容器 */
 .hanzi-page {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background-color: #f5f7fa;
   min-height: 100vh;
-  background: #f5f5f5;
 }
 
 .page-container {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
-  padding-right: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* 右侧边栏 */
 .sidebar {
-  width: 320px;
-  background: white;
-  border-left: 1px solid #e0e0e0;
-  overflow-y: auto;
-  flex-shrink: 0;
-  order: 2;
+  width: 350px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
 .sidebar-content {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* 控制区块 */
 .control-section {
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
 }
 
 .control-section:last-child {
   border-bottom: none;
+  padding-bottom: 0;
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 /* 文本输入 */
@@ -735,20 +758,24 @@ const resetZoom = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  order: 1;
+  margin-right: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
 .preview-header {
-  background: white;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .preview-title {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 600;
   color: #333;
   margin: 0;
@@ -757,30 +784,30 @@ const resetZoom = () => {
 .preview-tools {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .tool-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 1px solid #ddd;
-  background: white;
+  background-color: white;
   border-radius: 4px;
-  cursor: pointer;
   font-size: 16px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .tool-btn:hover {
-  background: #f5f5f5;
-  border-color: #667eea;
+  background-color: #f0f0f0;
+  border-color: #ccc;
 }
 
 .zoom-level {
-  font-size: 13px;
+  font-size: 14px;
   color: #666;
   min-width: 50px;
   text-align: center;
@@ -788,33 +815,32 @@ const resetZoom = () => {
 
 /* 预览区域 */
 .preview-wrapper {
-  flex: 1;
   overflow: auto;
-  background: #e8e8e8;
-  padding: 40px 20px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  max-height: calc(100vh - 150px);
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 10px;
 }
 
 .preview-container {
-  transform-origin: center top;
-  transition: transform 0.2s ease;
+  transform-origin: top left;
+  transition: transform 0.3s ease;
 }
 
 .worksheet-paper {
-  /* A4 纸张尺寸缩小80% */
-  width: 635px;  /* 794px * 0.8 */
-  height: 898px;  /* 1123px * 0.8 */
-  background: white;
-  padding: 48px 40px;  /* 60px * 0.8, 50px * 0.8 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 635px;
+  min-height: 898px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 0 auto 20px;
+  padding: 48px;
   box-sizing: border-box;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(var(--columns, 12), 1fr);
   grid-template-rows: repeat(10, 1fr);
   gap: 0;
-  margin-bottom: 30px;
   position: relative;
 }
 
