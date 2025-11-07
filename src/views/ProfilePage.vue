@@ -103,8 +103,47 @@
 </template>
 
 <script setup>
-// 这里可以添加个人中心的逻辑
-// 例如：获取用户信息、学习进度等
+import { ref, onMounted } from 'vue'
+import { userApi } from '../api'
+
+// 模拟用户数据
+const userData = ref({
+  username: '张三',
+  email: 'zhangsan@example.com',
+  phone: '138****8888',
+  level: 5,
+  learningDays: 120,
+  practiceCount: 365,
+  completedWorksheets: 15,
+  worksheets: [
+    { title: '汉字基础字帖', date: '2024-01-15', status: '已完成' },
+    { title: '英语单词字帖', date: '2024-01-14', status: '已完成' },
+    { title: '数字书写字帖', date: '2024-01-13', status: '已完成' }
+  ]
+})
+
+// 退出登录
+const logout = () => {
+  localStorage.removeItem('token')
+  // 跳转到登录页
+  window.location.href = '/login'
+}
+
+// 获取用户信息
+const fetchUserInfo = async () => {
+  try {
+    const response = await userApi.getProfile()
+    // 将API返回的数据更新到userData
+    userData.value = { ...userData.value, ...response.data }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
+
+// 页面加载时获取用户信息
+onMounted(() => {
+  fetchUserInfo()
+})
 </script>
 
 <style scoped>

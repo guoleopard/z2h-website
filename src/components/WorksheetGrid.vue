@@ -69,7 +69,7 @@
         <div class="filters">
           <div class="filter-group">
             <label for="grade-select">选择年级：</label>
-            <select id="grade-select" v-model="selectedGrade">
+            <select id="grade-select" v-model="selectedGrade" @change="handleFilterChange">
               <option value="">全部年级</option>
               <option value="一年级">一年级</option>
               <option value="二年级">二年级</option>
@@ -81,7 +81,7 @@
           </div>
           <div class="filter-group">
             <label for="subject-select">选择科目：</label>
-            <select id="subject-select" v-model="selectedSubject">
+            <select id="subject-select" v-model="selectedSubject" @change="handleFilterChange">
               <option value="">全部科目</option>
               <option value="语文">语文</option>
               <option value="英文">英文</option>
@@ -111,33 +111,53 @@
 
 <script setup>
 import WorksheetCard from './WorksheetCard.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { worksheetApi } from '../api'
 
 const selectedGrade = ref('')
 const selectedSubject = ref('')
-
-const worksheets = [
-  { icon: '📚', title: '一年级语文字帖', description: '适合小学一年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '🔤', title: '一年级英文字帖', description: '适合小学一年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '📚', title: '二年级语文字帖', description: '适合小学二年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '🔤', title: '二年级英文字帖', description: '适合小学二年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '📚', title: '三年级语文字帖', description: '适合小学三年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '🔤', title: '三年级英文字帖', description: '适合小学三年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '📚', title: '四年级语文字帖', description: '适合小学四年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '🔤', title: '四年级英文字帖', description: '适合小学四年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '📚', title: '五年级语文字帖', description: '适合小学五年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '🔤', title: '五年级英文字帖', description: '适合小学五年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '📚', title: '六年级语文字帖', description: '适合小学六年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
-  { icon: '🔤', title: '六年级英文字帖', description: '适合小学六年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' }
-]
+const worksheets = ref([])
+const loading = ref(true)
 
 const filteredWorksheets = computed(() => {
-  return worksheets.filter(worksheet => {
+  return worksheets.value.filter(worksheet => {
     const matchesGrade = !selectedGrade.value || worksheet.title.includes(selectedGrade.value)
     const matchesSubject = !selectedSubject.value || worksheet.title.includes(selectedSubject.value)
     return matchesGrade && matchesSubject
   })
 })
+
+// 获取小学各年级字帖数据
+const fetchWorksheets = async () => {
+  try {
+    loading.value = true
+    const response = await worksheetApi.getWorksheets({ type: 'grade' })
+    worksheets.value = response.data || []
+  } catch (error) {
+    console.error('获取字帖数据失败:', error)
+    // 如果API调用失败，使用默认数据
+    worksheets.value = [
+      { icon: '📚', title: '一年级语文字帖', description: '适合小学一年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
+      { icon: '🔤', title: '一年级英文字帖', description: '适合小学一年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
+      { icon: '📚', title: '二年级语文字帖', description: '适合小学二年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
+      { icon: '🔤', title: '二年级英文字帖', description: '适合小学二年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' },
+      { icon: '📚', title: '三年级语文字帖', description: '适合小学三年级学生的语文练习字帖', link: '/membership', buttonText: '立即购买' },
+      { icon: '🔤', title: '三年级英文字帖', description: '适合小学三年级学生的英文练习字帖', link: '/membership', buttonText: '立即购买' }
+    ]
+  } finally {
+    loading.value = false
+  }
+}
+
+// 页面加载时获取数据
+onMounted(() => {
+  fetchWorksheets()
+})
+
+// 当筛选条件变化时重新获取数据
+const handleFilterChange = () => {
+  fetchWorksheets()
+}
 </script>
 
 <style scoped>

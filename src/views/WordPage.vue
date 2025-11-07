@@ -787,4 +787,84 @@ const printWorksheet = () => {
   height: 16px;
   cursor: pointer;
 }
+/* 打印样式 */
+@media print {
+  /* 隐藏页面其他部分 */
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+  
+  /* 页面基础样式 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .word-page {
+    background: white;
+    min-height: auto;
+  }
+  
+  .page-container {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  
+  /* 隐藏所有非字帖内容 */
+  .sidebar,
+  .preview-header {
+    display: none !important;
+  }
+  
+  .main-content {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    display: block;
+  }
+  
+  .preview-wrapper {
+    padding: 0;
+    background: white;
+    display: block;
+    overflow: visible;
+  }
+  
+  .preview-container {
+    transform: none !important;
+    display: block;
+  }
+  
+  .worksheet-paper {
+    box-shadow: none;
+    width: 210mm;
+    height: 297mm;
+    padding: 15mm;
+    margin: 0;
+    page-break-after: always;
+    page-break-inside: avoid;
+    background: white;
+  }
+  
+  .worksheet-paper:last-child {
+    page-break-after: auto;
+  }
+  
+  .word-cell {
+    border: 1px solid #333 !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
 </style>
