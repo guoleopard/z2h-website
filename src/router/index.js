@@ -10,12 +10,19 @@ import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import DonatePage from '../views/DonatePage.vue'
 import InvitePage from '../views/InvitePage.vue'
 import ProfilePage from '../views/ProfilePage.vue'
+import NumberPage from '../views/NumberPage.vue'
+import PinyinPage from '../views/PinyinPage.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/pinyin',
+    name: 'Pinyin',
+    component: PinyinPage
   },
   {
     path: '/hanzi',
@@ -62,11 +69,8 @@ const routes = [
     name: 'Invite',
     component: InvitePage
   },
-  {
-    path: '/profile',
-    name: 'Profile',
-    component: ProfilePage
-  }
+  { path: '/profile', name: 'Profile', component: ProfilePage },
+  { path: '/number', name: 'Number', component: NumberPage }
 ]
 
 const router = createRouter({
