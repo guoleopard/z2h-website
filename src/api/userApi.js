@@ -72,6 +72,14 @@ const userApi = {
    */
   sendEmailCode: (data) => {
     return axiosInstance.post(API_CONFIG.endpoints.sendEmailCode, data);
+  },
+
+  /**
+   * 获取用户订单记录
+   * @returns {Promise}
+   */
+  getOrderHistory: () => {
+    return axiosInstance.get(API_CONFIG.endpoints.getOrderHistory);
   }
 };
 

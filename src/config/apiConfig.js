@@ -28,6 +28,9 @@ export const API_CONFIG = {
     // 验证码相关
     getCaptcha: '/api/captcha',
     sendSmsCode: '/api/sms/code',
-    sendEmailCode: '/api/email/code'
+    sendEmailCode: '/api/email/code',
+    
+    // 订单相关
+    getOrderHistory: '/api/order/history'
   }
 };
